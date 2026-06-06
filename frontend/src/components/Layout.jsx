@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import StatusBadge from "./StatusBadge";
 
 export default function Layout() {
   const { user, logout, isLibrarian } = useAuth();
@@ -13,7 +14,8 @@ export default function Layout() {
         </div>
         <div className="topbar-actions">
           <span className="user-chip">
-            {user.name} · {user.role}
+            {user.name}{" "}
+            <StatusBadge variant={isLibrarian ? "info" : "neutral"}>{user.role}</StatusBadge>
           </span>
           <button type="button" className="btn ghost" onClick={logout}>
             Log out
@@ -25,7 +27,7 @@ export default function Layout() {
         <NavLink to="/dashboard">Dashboard</NavLink>
         <NavLink to="/books">Books</NavLink>
         <NavLink to="/borrowings">Borrowings</NavLink>
-        {isLibrarian && <span className="nav-note">Librarian mode</span>}
+        {isLibrarian && <span className="nav-note">Catalog admin enabled</span>}
       </nav>
 
       <main className="content">

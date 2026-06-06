@@ -99,8 +99,8 @@ export default function BooksPage() {
 
       <SectionHint tone={isLibrarian ? "action" : "info"}>
         {isLibrarian
-          ? "Actionable: use Edit / Delete on each card. Members borrow from the blue button."
-          : "Actionable: only the Borrow button. Gray labels mean you already have the book or it is out of stock."}
+          ? "Librarian: Edit and Delete in the actions column. Members use Borrow."
+          : "Member: only Borrow is clickable. Status column shows why a row is blocked."}
       </SectionHint>
 
       <form className="search-bar card card--flat" onSubmit={handleSearch}>

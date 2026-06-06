@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import EmptyState from "../components/EmptyState";
+import DataTable from "../components/DataTable";
 import SectionHint from "../components/SectionHint";
 import Spinner from "../components/Spinner";
+import StatusBadge from "../components/StatusBadge";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+
+function loanStatus(loan) {
+  if (loan.returned_at) return { label: "Returned", variant: "neutral" };
+  if (loan.overdue) return { label: "Overdue", variant: "danger" };
+  return { label: "Active", variant: "success" };
+}
 
 export default function BorrowingsPage() {
   const { isLibrarian } = useAuth();
@@ -57,21 +64,97 @@ export default function BorrowingsPage() {
     }
   }
 
+  const columns = [
+    {
+      key: "book",
+      label: "Book",
+      render: (loan) => (
+        <div>
+          <strong>{loan.book.title}</strong>
+          <div className="small muted">{loan.book.author}</div>
+        </div>
+      ),
+    },
+  ];
+
+  if (isLibrarian) {
+    columns.push({
+      key: "member",
+      label: "Member",
+      render: (loan) => loan.user.name,
+    });
+  }
+
+  columns.push(
+    {
+      key: "due",
+      label: "Due date",
+      className: "col-compact",
+      render: (loan) => new Date(loan.due_at).toLocaleDateString(),
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "col-compact",
+      render: (loan) => {
+        const status = loanStatus(loan);
+        return <StatusBadge variant={status.variant}>{status.label}</StatusBadge>;
+      },
+    }
+  );
+
+  if (isLibrarian) {
+    columns.push({
+      key: "actions",
+      label: "Actions",
+      className: "col-actions",
+      render: (loan) => {
+        const busy = actionId === loan.id;
+        const isReturned = Boolean(loan.returned_at);
+
+        if (isReturned) {
+          return <StatusBadge variant="neutral">Closed</StatusBadge>;
+        }
+
+        return (
+          <div className="table-actions">
+            <button
+              type="button"
+              className="btn btn-sm primary"
+              disabled={busy}
+              onClick={() => handleReturn(loan.id)}
+            >
+              {busy ? "Saving..." : "Return"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm danger"
+              disabled={busy}
+              onClick={() => handleDelete(loan.id)}
+            >
+              Delete
+            </button>
+          </div>
+        );
+      },
+    });
+  }
+
   return (
     <section>
       <div className="section-head">
         <div>
           <h2>Borrowings</h2>
           <p className="muted">
-            {isLibrarian ? "Operational list with return actions." : "Read-only history of your loans."}
+            {isLibrarian ? "Manage returns from the actions column." : "Your loan history."}
           </p>
         </div>
       </div>
 
       <SectionHint tone={isLibrarian ? "action" : "info"}>
         {isLibrarian
-          ? "Actionable rows: Mark returned / Delete record on the right. Returned loans are read-only."
-          : "Read-only list. To borrow, go to Books. Returns are handled by a librarian."}
+          ? "Librarian: Return and Delete are enabled on active rows only."
+          : "Member: read-only table. Borrow new titles from Books."}
       </SectionHint>
 
       {!isLibrarian && (
@@ -83,57 +166,7 @@ export default function BorrowingsPage() {
       {loading ? (
         <Spinner label="Loading borrowings..." />
       ) : (
-        <div className="stack">
-          {borrowings.map((loan) => {
-            const isReturned = Boolean(loan.returned_at);
-            const busy = actionId === loan.id;
-
-            return (
-              <article
-                key={loan.id}
-                className={`card loan-card ${isLibrarian && !isReturned ? "loan-card--actionable" : "loan-card--readonly"}`}
-              >
-                <div>
-                  <h3>{loan.book.title}</h3>
-                  <p className="muted">{loan.book.author}</p>
-                  {isLibrarian && <p className="small">Member: {loan.user.name}</p>}
-                  <p className="small">
-                    Due {new Date(loan.due_at).toLocaleDateString()}
-                    {loan.overdue && !isReturned && <span className="badge warn"> overdue</span>}
-                    {isReturned && <span className="badge ok"> returned</span>}
-                  </p>
-                </div>
-
-                {isLibrarian && !isReturned && (
-                  <div className="loan-card-actions">
-                    <button
-                      type="button"
-                      className="btn primary"
-                      disabled={busy}
-                      onClick={() => handleReturn(loan.id)}
-                    >
-                      {busy ? "Saving..." : "Mark returned"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn danger"
-                      disabled={busy}
-                      onClick={() => handleDelete(loan.id)}
-                    >
-                      Delete record
-                    </button>
-                  </div>
-                )}
-
-                {!isLibrarian && <span className="pill pill--readonly">View only</span>}
-              </article>
-            );
-          })}
-
-          {!borrowings.length && (
-            <EmptyState title="No borrowings yet" detail="When you borrow a book, it will show up here." />
-          )}
-        </div>
+        <DataTable columns={columns} rows={borrowings} emptyMessage="No borrowings yet" />
       )}
     </section>
   );
