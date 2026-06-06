@@ -88,6 +88,36 @@ Also added inline comments around auth, borrow transactions, and policy scopes.
 
 ---
 
+## UX pass — toasts, loading, actionable vs read-only
+
+First version used plain red `<p className="error">` under the search bar. It worked, but felt cheap and easy to miss.
+
+I almost added a toast library, then backed off — for this codebase size, a tiny `ToastContext` is enough.
+
+Other tweaks from dogfooding:
+- Borrow button disappearing when unavailable was confusing → now it stays visible but disabled with a reason.
+- Dashboard looked clickable but did nothing → read-only hints + link to Books / Borrowings.
+- Search had no feedback → separate "Searching..." state on the button.
+
+Later iteration replaced card lists with tables on Books, Borrowings, and Dashboard for a cleaner scan pattern.
+
+---
+
+## Performance pass — N+1 and indexes
+
+While clicking around the catalog I remembered `available_copies` was doing `borrowings.active.count` **per book**. Fine with 4 seed rows, bad with 4,000.
+
+Fix: `Book.with_availability_counts` uses one SQL subquery in the index endpoint. Second query loads the member's active `book_id`s for the "already on loan" flag.
+
+Indexes already in place from day one:
+- `books.title`, `author`, `genre` for ILIKE search
+- `borrowings(user_id, book_id, returned_at)` for duplicate-loan checks
+- `borrowings.due_at`, `returned_at` for dashboard scopes
+
+Next step if this were production: pagination + `pg_trgm` for fuzzy search + Bullet gem in CI.
+
+---
+
 ## Layer map
 
 Quick reference for how responsibilities are split:
