@@ -2,20 +2,29 @@
 
 Rails 7 API-only app.
 
-## Setup
+## Prerequisites
+
+- Ruby 2.7.5
+- PostgreSQL running locally
+
+## Setup (copy/paste)
 
 ```bash
+cd backend
 bundle install
-createdb bla_library_development
-createdb bla_library_test
+bundle exec rails db:create
 bundle exec rails db:migrate
 bundle exec rails db:seed
 bundle exec rails server -p 3000
 ```
 
-## Tests
+## Tests (copy/paste)
 
 ```bash
+cd backend
+bundle install
+bundle exec rails db:create RAILS_ENV=test
+bundle exec rails db:migrate RAILS_ENV=test
 bundle exec rspec
 ```
 

@@ -2,21 +2,32 @@
 
 React + Vite client for the Rails API.
 
-## Setup
+## Prerequisites
+
+- Node.js 18+
+- Backend API running on http://localhost:3000
+
+## Setup (copy/paste)
 
 ```bash
+cd frontend
 npm install
 cp .env.example .env
 npm run dev
 ```
 
-Default API URL: `http://localhost:3000/api/v1`
+Open http://localhost:5173
 
-## Scripts
+## Production build (copy/paste)
 
-- `npm run dev` - local dev server (port 5173)
-- `npm run build` - production build
-- `npm run preview` - preview build
+```bash
+cd frontend
+npm install
+npm run build
+npm run preview
+```
+
+Default API URL: `/api/v1` (proxied to Rails by Vite in dev — see `vite.config.js`)
 
 ## Notes
 

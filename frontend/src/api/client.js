@@ -1,7 +1,7 @@
 // Thin fetch wrapper around the Rails API.
 // Single file so headers, errors, and token handling stay in one place.
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+const API_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 function getToken() {
   return localStorage.getItem("library_token");

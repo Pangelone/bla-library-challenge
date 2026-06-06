@@ -23,25 +23,38 @@ Public repo: https://github.com/Pangelone/bla-library-challenge
 | Librarian | librarian@library.test | password123 |
 | Member | member@library.test | password123 |
 
-## Backend setup
+## Prerequisites
+
+- Ruby 2.7.5
+- PostgreSQL running locally
+- Node.js 18+ and npm
+
+## Backend setup (copy/paste)
 
 ```bash
 cd backend
 bundle install
-createdb bla_library_development
-createdb bla_library_test
+bundle exec rails db:create
 bundle exec rails db:migrate
 bundle exec rails db:seed
 bundle exec rails server -p 3000
 ```
 
-Run tests:
+API runs at http://localhost:3000
+
+## Backend tests (copy/paste)
 
 ```bash
+cd backend
+bundle install
+bundle exec rails db:create RAILS_ENV=test
+bundle exec rails db:migrate RAILS_ENV=test
 bundle exec rspec
 ```
 
-## Frontend setup
+## Frontend setup (copy/paste)
+
+Open a **second terminal** while the API is running:
 
 ```bash
 cd frontend
@@ -51,6 +64,22 @@ npm run dev
 ```
 
 Open http://localhost:5173
+
+The frontend proxies `/api` to the Rails server (see `frontend/vite.config.js`), so you should not hit CORS issues in local dev.
+
+## Full local run (quick reference)
+
+Terminal 1:
+
+```bash
+cd backend && bundle install && bundle exec rails db:create db:migrate db:seed && bundle exec rails server -p 3000
+```
+
+Terminal 2:
+
+```bash
+cd frontend && npm install && cp .env.example .env && npm run dev
+```
 
 ## Architecture (quick)
 
