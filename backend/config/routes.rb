@@ -7,7 +7,7 @@ Rails.application.routes.draw do
       delete "auth/logout", to: "auth#logout"
 
       resources :books
-      resources :borrowings, only: [:index, :create] do
+      resources :borrowings do
         member do
           patch :return, action: :return_book
         end

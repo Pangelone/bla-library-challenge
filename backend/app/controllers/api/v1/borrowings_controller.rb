@@ -5,13 +5,17 @@ module Api
     class BorrowingsController < ApplicationController
       include Authenticatable
 
-      before_action :set_borrowing, only: [:return_book]
+      before_action :set_borrowing, only: [:show, :update, :destroy, :return_book]
 
       def index
         authorize Borrowing
-        scope = current_user.librarian? ? Borrowing.all : current_user.borrowings
-        borrowings = scope.includes(:book, :user).order(created_at: :desc)
+        borrowings = policy_scope(Borrowing).includes(:book, :user).order(created_at: :desc)
         render json: borrowings, status: :ok
+      end
+
+      def show
+        authorize @borrowing
+        render json: @borrowing, status: :ok
       end
 
       def create
@@ -26,6 +30,24 @@ module Api
         end
       end
 
+      # Full REST update - librarian can adjust due date or set returned_at
+      def update
+        authorize @borrowing
+
+        if @borrowing.update(borrowing_params)
+          render json: @borrowing, status: :ok
+        else
+          render_errors(@borrowing)
+        end
+      end
+
+      def destroy
+        authorize @borrowing
+        @borrowing.destroy
+        head :no_content
+      end
+
+      # Convenience route kept for the UI - same end result as PATCH with returned_at
       def return_book
         authorize @borrowing, :return_book?
         result = Borrowings::ReturnService.new(borrowing: @borrowing).call
@@ -40,7 +62,11 @@ module Api
       private
 
       def set_borrowing
-        @borrowing = Borrowing.find(params[:id])
+        @borrowing = policy_scope(Borrowing).find(params[:id])
+      end
+
+      def borrowing_params
+        params.require(:borrowing).permit(:due_at, :returned_at)
       end
     end
   end
