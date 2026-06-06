@@ -2,6 +2,7 @@
 
 module Api
   module V1
+    # Aggregated read models for dashboards - no fat queries in the controller
     class DashboardsController < ApplicationController
       include Authenticatable
 

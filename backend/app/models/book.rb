@@ -11,10 +11,11 @@ class Book < ApplicationRecord
     return all if query.blank?
 
     term = "%#{sanitize_sql_like(query.strip)}%"
+    # ILIKE is postgres-specific; fine here because the exercise runs on pg
     where("title ILIKE :t OR author ILIKE :t OR genre ILIKE :t", t: term)
   }
 
-  # Derived, not stored - avoids sync bugs when returns happen
+  # Derived field - I prefer recalculating over syncing a counter column
   def active_borrowings_count
     borrowings.active.count
   end

@@ -17,9 +17,9 @@ module Borrowings
       borrowing = nil
 
       ActiveRecord::Base.transaction do
-        # Row lock avoids two members grabbing the last copy at the same time
         locked_book = Book.lock.find(book.id)
 
+        # Check duplicate before availability - clearer error for the member
         if user.borrowings.active.exists?(book_id: locked_book.id)
           return failure("You already have an active loan for this book")
         end

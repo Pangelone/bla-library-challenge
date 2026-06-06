@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
 
+  # librarian = staff, member = can borrow. Keep it as enum so Pundit stays readable.
   enum role: { member: 0, librarian: 1 }
 
   has_many :borrowings, dependent: :destroy

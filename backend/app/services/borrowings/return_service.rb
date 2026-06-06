@@ -2,6 +2,7 @@
 
 module Borrowings
   class ReturnService
+    # Small but worth isolating - return rules may grow (fees, reminders, etc.)
     Result = Struct.new(:success?, :borrowing, :errors, keyword_init: true)
 
     def initialize(borrowing:)

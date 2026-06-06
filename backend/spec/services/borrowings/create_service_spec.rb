@@ -13,4 +13,14 @@ RSpec.describe Borrowings::CreateService do
     expect(result.success?).to be(false)
     expect(result.errors).to include("Book is not available")
   end
+
+  it "prevents librarians from borrowing" do
+    librarian = create(:user, :librarian)
+    book = create(:book)
+
+    result = described_class.new(user: librarian, book: book).call
+
+    expect(result.success?).to be(false)
+    expect(result.errors).to include("Only members can borrow books")
+  end
 end

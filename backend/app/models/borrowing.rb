@@ -1,5 +1,5 @@
 class Borrowing < ApplicationRecord
-  LOAN_PERIOD = 2.weeks
+  LOAN_PERIOD = 2.weeks # PDF requirement: due two weeks after borrow date
 
   belongs_to :user
   belongs_to :book

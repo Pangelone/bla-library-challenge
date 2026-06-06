@@ -2,7 +2,7 @@
 
 module Api
   module V1
-    # Auth endpoints are public - no Authenticatable concern here.
+    # Public auth endpoints - no Authenticatable concern on the whole controller
     class AuthController < ApplicationController
       def register
         user = User.new(register_params)
@@ -34,7 +34,7 @@ module Api
       end
 
       def logout
-        # Stateless JWT: client drops the token. Endpoint exists for API completeness.
+        # Stateless JWT: client drops the token. Endpoint exists so the API contract feels complete.
         render json: { message: "Logged out" }, status: :ok
       end
 

@@ -9,6 +9,7 @@ module Api
 
       def index
         authorize Book
+        # ILIKE search is enough here; pg_trgm would be the next step if catalog grows a lot
         books = Book.search(params[:q]).order(:title)
         render json: books, status: :ok
       end
