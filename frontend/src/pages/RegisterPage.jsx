@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function RegisterPage() {
   const { register, user } = useAuth();
+  const toast = useToast();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -11,7 +13,7 @@ export default function RegisterPage() {
     password_confirmation: "",
     role: "member",
   });
-  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -23,11 +25,14 @@ export default function RegisterPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError("");
+    setSubmitting(true);
     try {
       await register(form);
+      toast.success("Account created");
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -73,9 +78,8 @@ export default function RegisterPage() {
             <option value="librarian">Librarian</option>
           </select>
         </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" className="btn primary full">
-          Register
+        <button type="submit" className="btn primary full" disabled={submitting}>
+          {submitting ? "Creating..." : "Register"}
         </button>
         <p className="small">
           Already have an account? <Link to="/login">Log in</Link>

@@ -2,29 +2,37 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import BookForm from "../components/BookForm";
 import BookList from "../components/BookList";
+import SectionHint from "../components/SectionHint";
+import Spinner from "../components/Spinner";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function BooksPage() {
   const { isLibrarian } = useAuth();
-  // Local state only - no Redux. For this size it is easier to explain live.
+  const toast = useToast();
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [searching, setSearching] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [borrowingId, setBorrowingId] = useState(null);
 
-  async function loadBooks(search = query) {
-    setLoading(true);
-    setError("");
+  async function loadBooks(search = query, withSearchSpinner = false) {
+    if (withSearchSpinner) {
+      setSearching(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const data = await api.listBooks(search);
       setBooks(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
+      setSearching(false);
     }
   }
 
@@ -34,35 +42,42 @@ export default function BooksPage() {
 
   async function handleSearch(event) {
     event.preventDefault();
-    await loadBooks(query);
+    await loadBooks(query, true);
   }
 
   async function handleCreate(book) {
     await api.createBook(book);
     setShowForm(false);
+    toast.success("Book added to the catalog");
     await loadBooks();
   }
 
   async function handleUpdate(book) {
     await api.updateBook(editingBook.id, book);
     setEditingBook(null);
+    toast.success("Book updated");
     await loadBooks();
   }
 
   async function handleDelete(id) {
     if (!window.confirm("Delete this book?")) return;
-    await api.deleteBook(id);
-    await loadBooks();
+    try {
+      await api.deleteBook(id);
+      toast.success("Book removed");
+      await loadBooks();
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   async function handleBorrow(bookId) {
     setBorrowingId(bookId);
-    setError("");
     try {
       await api.borrowBook(bookId);
+      toast.success("Book borrowed — check your dashboard for the due date");
       await loadBooks();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setBorrowingId(null);
     }
@@ -82,19 +97,22 @@ export default function BooksPage() {
         )}
       </div>
 
-      <form className="search-bar" onSubmit={handleSearch}>
+      <SectionHint tone={isLibrarian ? "action" : "info"}>
+        {isLibrarian
+          ? "Actionable: use Edit / Delete on each card. Members borrow from the blue button."
+          : "Actionable: only the Borrow button. Gray labels mean you already have the book or it is out of stock."}
+      </SectionHint>
+
+      <form className="search-bar card card--flat" onSubmit={handleSearch}>
         <input
           placeholder="Search catalog..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="submit" className="btn ghost">
-          Search
+        <button type="submit" className="btn ghost" disabled={searching}>
+          {searching ? "Searching..." : "Search"}
         </button>
       </form>
-
-      {error && <p className="error">{error}</p>}
-      {loading && <p className="muted">Loading books...</p>}
 
       {showForm && (
         <BookForm submitLabel="Create book" onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
@@ -109,7 +127,9 @@ export default function BooksPage() {
         />
       )}
 
-      {!loading && (
+      {loading ? (
+        <Spinner label="Loading catalog..." />
+      ) : (
         <BookList
           books={books}
           onBorrow={handleBorrow}

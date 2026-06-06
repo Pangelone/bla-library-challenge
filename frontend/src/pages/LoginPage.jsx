@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
+  const toast = useToast();
   const [email, setEmail] = useState("member@library.test");
   const [password, setPassword] = useState("password123");
-  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -14,11 +16,14 @@ export default function LoginPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError("");
+    setSubmitting(true);
     try {
       await login(email, password);
+      toast.success("Welcome back");
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -40,9 +45,8 @@ export default function LoginPage() {
             required
           />
         </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" className="btn primary full">
-          Log in
+        <button type="submit" className="btn primary full" disabled={submitting}>
+          {submitting ? "Signing in..." : "Log in"}
         </button>
         <p className="small">
           Need an account? <Link to="/register">Register</Link>

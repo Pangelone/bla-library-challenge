@@ -1,26 +1,36 @@
 import { useAuth } from "../context/AuthContext";
+import EmptyState from "./EmptyState";
 
-export default function BookList({
-  books,
-  onBorrow,
-  onEdit,
-  onDelete,
-  borrowing,
-}) {
+function borrowStatus(book, borrowingId) {
+  if (borrowingId === book.id) {
+    return { label: "Requesting...", disabled: true, tone: "info" };
+  }
+  if (book.user_has_active_loan) {
+    return { label: "Already on loan", disabled: true, tone: "warn" };
+  }
+  if (!book.available) {
+    return { label: "No copies left", disabled: true, tone: "warn" };
+  }
+  return { label: "Borrow", disabled: false, tone: "action" };
+}
+
+export default function BookList({ books, onBorrow, onEdit, onDelete, borrowing }) {
   const { isLibrarian, user } = useAuth();
 
   if (!books.length) {
-    return <p className="muted">No books found.</p>;
+    return <EmptyState title="No books found" detail="Try another search or ask a librarian to add titles." />;
   }
 
   return (
     <div className="book-grid">
       {books.map((book) => {
-        const canBorrow =
-          user?.role === "member" && book.available && borrowing !== book.id;
+        const memberBorrow = user?.role === "member" ? borrowStatus(book, borrowing) : null;
 
         return (
-          <article key={book.id} className="card book-card">
+          <article
+            key={book.id}
+            className={`card book-card ${isLibrarian ? "book-card--actionable" : ""}`}
+          >
             <div className="book-card-head">
               <h3>{book.title}</h3>
               <span className={`badge ${book.available ? "ok" : "warn"}`}>
@@ -32,11 +42,17 @@ export default function BookList({
             <p className="small">ISBN {book.isbn}</p>
 
             <div className="card-actions">
-              {canBorrow && (
-                <button type="button" className="btn primary" onClick={() => onBorrow(book.id)}>
-                  Borrow
+              {memberBorrow && (
+                <button
+                  type="button"
+                  className={`btn ${memberBorrow.disabled ? "btn-disabled" : "primary"}`}
+                  disabled={memberBorrow.disabled}
+                  onClick={() => onBorrow(book.id)}
+                >
+                  {memberBorrow.label}
                 </button>
               )}
+
               {isLibrarian && (
                 <>
                   <button type="button" className="btn ghost" onClick={() => onEdit(book)}>

@@ -23,3 +23,20 @@
 - Member cannot borrow when `available_copies` is zero.
 - Librarian-only CRUD on books (members get 403, not a silent failure).
 - Concurrent borrows on the last copy use a DB row lock in the service layer.
+
+## UX iteration (second pass)
+
+**As a** member  
+**I want** clear feedback when I cannot borrow (already on loan vs no copies)  
+**So that** I do not think the app is broken.
+
+**As a** librarian  
+**I want** to know which screens are read-only vs actionable  
+**So that** I do not hunt for buttons on the dashboard that will never exist there.
+
+Changes shipped:
+- Toast notifications instead of red inline text
+- Loading spinners on catalog, dashboard, borrowings
+- Disabled Borrow button with label ("Already on loan", "No copies left")
+- Dashboard marked as read-only; actions live on Books / Borrowings
+- Table layouts for catalog, borrowings, and loan summaries
