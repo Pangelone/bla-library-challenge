@@ -15,9 +15,24 @@ class Book < ApplicationRecord
     where("title ILIKE :t OR author ILIKE :t OR genre ILIKE :t", t: term)
   }
 
-  # Derived field - I prefer recalculating over syncing a counter column
+  # One SQL subquery instead of N counts when listing the catalog (avoids N+1)
+  scope :with_availability_counts, -> {
+    select(
+      "books.*",
+      <<~SQL.squish
+        (SELECT COUNT(*) FROM borrowings
+         WHERE borrowings.book_id = books.id
+         AND borrowings.returned_at IS NULL) AS cached_active_borrowings_count
+      SQL
+    )
+  }
+
   def active_borrowings_count
-    borrowings.active.count
+    if has_attribute?(:cached_active_borrowings_count)
+      self[:cached_active_borrowings_count].to_i
+    else
+      borrowings.active.count
+    end
   end
 
   def available_copies

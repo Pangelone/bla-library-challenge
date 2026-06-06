@@ -15,6 +15,16 @@ RSpec.describe "Books API", type: :request do
       expect(json.size).to eq(1)
     end
 
+    it "flags books the member already borrowed" do
+      loaned = create(:book, title: "Loaned Book", isbn: "LOAN123")
+      create(:borrowing, user: member, book: loaned)
+
+      get "/api/v1/books", headers: auth_headers(member)
+
+      entry = json.find { |book| book["id"] == loaned.id }
+      expect(entry["user_has_active_loan"]).to be(true)
+    end
+
     it "returns 401 without auth" do
       get "/api/v1/books"
 

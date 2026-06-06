@@ -9,9 +9,10 @@ module Api
 
       def index
         authorize Book
-        # ILIKE search is enough here; pg_trgm would be the next step if catalog grows a lot
-        books = Book.search(params[:q]).order(:title)
-        render json: books, status: :ok
+        books = Book.search(params[:q]).with_availability_counts.order(:title)
+        active_loan_book_ids = member_active_loan_book_ids
+
+        render json: books.map { |book| book_json(book, active_loan_book_ids) }, status: :ok
       end
 
       def show
@@ -54,6 +55,18 @@ module Api
 
       def book_params
         params.require(:book).permit(:title, :author, :genre, :isbn, :total_copies)
+      end
+
+      def member_active_loan_book_ids
+        return [] unless current_user.member?
+
+        current_user.borrowings.active.pluck(:book_id)
+      end
+
+      def book_json(book, active_loan_book_ids = [])
+        book.as_json.merge(
+          user_has_active_loan: active_loan_book_ids.include?(book.id)
+        )
       end
     end
   end
