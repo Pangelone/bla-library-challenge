@@ -19,15 +19,21 @@ bundle exec rails server -p 3000
 bundle exec rspec
 ```
 
+45 specs covering auth, books CRUD, borrowings CRUD, dashboards, and service objects.
+
 ## Main endpoints
 
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `GET /api/v1/books?q=search`
-- `POST /api/v1/borrowings` (member)
-- `PATCH /api/v1/borrowings/:id/return` (librarian)
-- `GET /api/v1/dashboard/librarian`
-- `GET /api/v1/dashboard/member`
+| Method | Path | Who |
+|--------|------|-----|
+| POST | /api/v1/auth/register | public |
+| POST | /api/v1/auth/login | public |
+| DELETE | /api/v1/auth/logout | public |
+| GET | /api/v1/books | authenticated |
+| POST/PATCH/DELETE | /api/v1/books | librarian |
+| GET/POST/PATCH/DELETE | /api/v1/borrowings | member create, librarian update/delete |
+| PATCH | /api/v1/borrowings/:id/return | librarian |
+| GET | /api/v1/dashboard/librarian | librarian |
+| GET | /api/v1/dashboard/member | member |
 
 ## Demo users
 

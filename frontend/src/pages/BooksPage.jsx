@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function BooksPage() {
   const { isLibrarian } = useAuth();
+  // Local state only - no Redux. For this size it is easier to explain live.
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);

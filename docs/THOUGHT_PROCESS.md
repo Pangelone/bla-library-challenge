@@ -77,6 +77,17 @@ I did not chase 100% coverage. I chased **the requirements list** from the PDF.
 
 ---
 
+## Final pass before submission
+
+After the first implementation I re-read the PDF literally and noticed two gaps:
+
+1. **Borrowings CRUD** - I only had index/create/return. Added show, update, destroy on the API plus specs.
+2. **RSpec for every requirement** - expanded auth, books, borrowings, dashboards, and both borrow services.
+
+Also added inline comments around auth, borrow transactions, and policy scopes.
+
+---
+
 ## Layer map
 
 Quick reference for how responsibilities are split:

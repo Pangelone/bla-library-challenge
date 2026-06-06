@@ -71,8 +71,15 @@ export const api = {
 
   listBorrowings: () => request("/borrowings"),
 
+  getBorrowing: (id) => request(`/borrowings/${id}`),
+
   borrowBook: (bookId) =>
     request("/borrowings", { method: "POST", body: JSON.stringify({ book_id: bookId }) }),
+
+  updateBorrowing: (id, borrowing) =>
+    request(`/borrowings/${id}`, { method: "PATCH", body: JSON.stringify({ borrowing }) }),
+
+  deleteBorrowing: (id) => request(`/borrowings/${id}`, { method: "DELETE" }),
 
   returnBook: (borrowingId) =>
     request(`/borrowings/${borrowingId}/return`, { method: "PATCH" }),

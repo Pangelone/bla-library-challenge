@@ -34,6 +34,16 @@ export default function BorrowingsPage() {
     }
   }
 
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this loan record?")) return;
+    try {
+      await api.deleteBorrowing(id);
+      await loadBorrowings();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
     <section>
       <div className="section-head">
@@ -62,6 +72,11 @@ export default function BorrowingsPage() {
             {isLibrarian && !loan.returned_at && (
               <button type="button" className="btn primary" onClick={() => handleReturn(loan.id)}>
                 Mark returned
+              </button>
+            )}
+            {isLibrarian && (
+              <button type="button" className="btn danger" onClick={() => handleDelete(loan.id)}>
+                Delete record
               </button>
             )}
           </article>
