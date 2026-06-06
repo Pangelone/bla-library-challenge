@@ -1,0 +1,24 @@
+# Dependencies
+backend/vendor/bundle/
+backend/.bundle/
+frontend/node_modules/
+
+# Rails runtime
+backend/log/*
+backend/tmp/*
+!backend/log/.keep
+!backend/tmp/.keep
+backend/storage/*
+!backend/storage/.keep
+
+# Secrets
+backend/config/master.key
+backend/.env
+frontend/.env
+
+# OS / editor
+.DS_Store
+*.swp
+
+# Build output
+frontend/dist/
