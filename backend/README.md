@@ -1,24 +1,35 @@
-# README
+# Backend - Library API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails 7 API-only app.
 
-Things you may want to cover:
+## Setup
 
-* Ruby version
+```bash
+bundle install
+createdb bla_library_development
+createdb bla_library_test
+bundle exec rails db:migrate
+bundle exec rails db:seed
+bundle exec rails server -p 3000
+```
 
-* System dependencies
+## Tests
 
-* Configuration
+```bash
+bundle exec rspec
+```
 
-* Database creation
+## Main endpoints
 
-* Database initialization
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/books?q=search`
+- `POST /api/v1/borrowings` (member)
+- `PATCH /api/v1/borrowings/:id/return` (librarian)
+- `GET /api/v1/dashboard/librarian`
+- `GET /api/v1/dashboard/member`
 
-* How to run the test suite
+## Demo users
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- librarian@library.test / password123
+- member@library.test / password123
